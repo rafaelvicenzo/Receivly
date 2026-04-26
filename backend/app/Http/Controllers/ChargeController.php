@@ -8,12 +8,14 @@ use App\Models\Charge;
 class ChargeController extends Controller
 {
     public function store(Request $request)
-    {
-        return Charge::create($request->all());
-    }
+{
+    return response()->json([
+        'user' => $request->user()
+    ]);
+}
 
-    public function index()
-    {
-        return \App\Models\Charge::all();
-    }
+    public function index(Request $request)
+{
+    return $request->user()->charges;
+}
 }
