@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Charge extends Model
 {
-    protected $fillable = ['amount', 'due_date', 'status'];
+    protected $fillable = ['amount', 'due_date', 'user_id', 'status'];
 
     public function user()
 {
