@@ -6,10 +6,41 @@ use Illuminate\Database\Eloquent\Model;
 
 class Charge extends Model
 {
-    protected $fillable = ['amount', 'due_date', 'user_id', 'status'];
+    protected $fillable = [
+        'user_id',
+        'customer_name',
+        'customer_email',
+        'customer_document',
+        'description',
+        'amount',
+        'due_date',
+        'status',
+        'payment_method',
+        'paid_at',
+        'fine_amount',
+        'interest_amount',
+        'discount_amount',
+        'pix_key',
+        'boleto_code',
+        'notes'
+    ];
+
+    protected $casts = [
+        'due_date' => 'date',
+        'paid_at'  => 'datetime',
+        'amount'   => 'decimal:2',
+        'fine_amount' => 'decimal:2',
+        'interest_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+    ];
 
     public function user()
-{
-    return $this->belongsTo(User::class);
-}
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getTotalAmountAttribute(): float
+    {
+        return $this->amount + $this->fine_amount + $this->interest_amount - $this->discount_amount;
+    }
 }

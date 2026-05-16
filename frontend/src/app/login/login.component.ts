@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../services/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -15,8 +17,14 @@ export class LoginComponent implements OnInit {
   rememberMe = false;
   emailFocused = false;
   passwordFocused = false;
+  isLoading = false;
+  errorMessage = '';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -45,7 +53,20 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-      console.log('Form submitted:', this.loginForm.value);
+      this.isLoading = true;
+      this.errorMessage = '';
+
+      const { email, password } = this.loginForm.value;
+
+      this.authService.login(email, password).subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.errorMessage = err.error?.error || 'Erro ao fazer login. Tente novamente.';
+        }
+      });
     } else {
       this.loginForm.markAllAsTouched();
     }
