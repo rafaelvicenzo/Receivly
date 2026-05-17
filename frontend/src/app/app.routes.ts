@@ -4,7 +4,9 @@ import { Dashboard } from './dashboard/dashboard';
 import { Charges } from './charges/charges';
 import { Clients } from './clients/clients';
 import { Layout } from './layout/layout';
+import { CollectionRules } from './collection-rules/collection-rules';
 import { authGuard } from './guards/auth-guard';
+import { Reports } from './reports/reports';
 
 export const routes: Routes = [
   {
@@ -22,7 +24,9 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'charges', component: Charges },
-      { path: 'clients', component: Clients }
+      { path: 'clients', component: Clients },
+      { path: 'collection-rules', component: CollectionRules },
+      { path: 'reports', component: Reports }
     ]
   }
 ];

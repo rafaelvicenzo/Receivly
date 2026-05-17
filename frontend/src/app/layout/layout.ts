@@ -19,7 +19,8 @@ export class Layout {
   constructor(private authService: AuthService, private router: Router) {
     this.router.events.subscribe(() => {
       const url = this.router.url;
-      if (url.includes('dashboard')) this.currentPage = 'dashboard';
+      if (url.includes('collection-rules')) this.currentPage = 'regua';
+      else if (url.includes('dashboard')) this.currentPage = 'dashboard';
       else if (url.includes('charges')) this.currentPage = 'cobrancas';
       else if (url.includes('clients')) this.currentPage = 'clientes';
       else if (url.includes('reports')) this.currentPage = 'relatorios';
@@ -45,7 +46,8 @@ export class Layout {
       clientes: '/clients',
       relatorios: '/reports',
       pix: '/pix',
-      configuracoes: '/settings'
+      configuracoes: '/settings',
+      regua: '/collection-rules',
     };
     if (routes[page]) {
       this.router.navigate([routes[page]]);

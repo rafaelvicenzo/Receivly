@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientService, Client } from '../services/client';
+import { ScoreService, ClientScore } from '../services/score';
 
 @Component({
   selector: 'app-clients',
@@ -13,11 +14,14 @@ import { ClientService, Client } from '../services/client';
 export class Clients implements OnInit {
   clients: Client[] = [];
   filteredClients: Client[] = [];
+  clientScores: Record<number, ClientScore> = {};
   isLoading = false;
   showModal = false;
   showDrawer = false;
   isEditing = false;
   selectedClient: Client | null = null;
+  selectedClientScore: ClientScore | null = null;
+  isLoadingScore = false;
   filterStatus = 'all';
   searchQuery = '';
   clientForm!: FormGroup;
@@ -26,6 +30,7 @@ export class Clients implements OnInit {
 
   constructor(
     private clientService: ClientService,
+    private scoreService: ScoreService,
     private fb: FormBuilder
   ) {}
 
@@ -56,9 +61,26 @@ export class Clients implements OnInit {
         this.clients = data;
         this.applyFilter();
         this.isLoading = false;
+        this.loadAllScores();
       },
       error: () => { this.isLoading = false; }
     });
+  }
+
+  loadAllScores(): void {
+    this.scoreService.getAllScores().subscribe({
+      next: (scores) => {
+        const map: Record<number, ClientScore> = {};
+        scores.forEach(score => {
+          map[score.client_id] = score;
+        });
+        this.clientScores = { ...map };
+      }
+    });
+  }
+
+  getScore(clientId: number): ClientScore | null {
+    return this.clientScores[clientId] || null;
   }
 
   applyFilter(): void {
@@ -113,12 +135,25 @@ export class Clients implements OnInit {
 
   openDrawer(client: Client): void {
     this.selectedClient = client;
+    this.selectedClientScore = null;
     this.showDrawer = true;
+
+    if (client.id) {
+      this.isLoadingScore = true;
+      this.scoreService.getClientScore(client.id).subscribe({
+        next: (score) => {
+          this.selectedClientScore = score;
+          this.isLoadingScore = false;
+        },
+        error: () => { this.isLoadingScore = false; }
+      });
+    }
   }
 
   closeDrawer(): void {
     this.showDrawer = false;
     this.selectedClient = null;
+    this.selectedClientScore = null;
   }
 
   onSubmit(): void {
@@ -170,17 +205,6 @@ export class Clients implements OnInit {
 
   getStatusLabel(status: string): string {
     return status === 'active' ? 'Ativo' : 'Inativo';
-  }
-
-  getRiskScore(client: Client): string {
-    const scores = ['low', 'medium', 'high'];
-    const index = (client.name.charCodeAt(0) + (client.id || 0)) % 3;
-    return scores[index];
-  }
-
-  getRiskLabel(score: string): string {
-    const map: Record<string, string> = { low: 'Baixo risco', medium: 'Médio risco', high: 'Alto risco' };
-    return map[score];
   }
 
   get totalActive(): number {

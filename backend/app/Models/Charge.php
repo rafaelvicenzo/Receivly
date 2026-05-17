@@ -22,7 +22,14 @@ class Charge extends Model
         'discount_amount',
         'pix_key',
         'boleto_code',
-        'notes'
+        'notes',
+        'asaas_id',
+        'asaas_status',
+        'pix_qr_code',
+        'pix_copy_paste',
+        'boleto_url',
+        'boleto_line',
+        'invoice_url'
     ];
 
     protected $casts = [

@@ -18,7 +18,8 @@ class Client extends Model
         'state',
         'zip_code',
         'status',
-        'notes'
+        'notes',
+        'asaas_customer_id'
     ];
 
     public function user()

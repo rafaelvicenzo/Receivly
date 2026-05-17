@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ChargeService, Charge } from '../services/charge';
+import { ClientService, Client } from '../services/client';
 
 @Component({
   selector: 'app-charges',
@@ -13,6 +14,7 @@ import { ChargeService, Charge } from '../services/charge';
 export class Charges implements OnInit {
   charges: Charge[] = [];
   filteredCharges: Charge[] = [];
+  clients: Client[] = [];
   isLoading = false;
   showModal = false;
   isEditing = false;
@@ -24,25 +26,85 @@ export class Charges implements OnInit {
 
   constructor(
     private chargeService: ChargeService,
+    private clientService: ClientService,
     private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadCharges();
+    this.loadClients();
   }
 
   initForm(): void {
     this.chargeForm = this.fb.group({
+      client_id:         [null],
       customer_name:     ['', Validators.required],
       customer_email:    ['', Validators.email],
       customer_document: [''],
       description:       [''],
-      amount:            ['', [Validators.required, Validators.min(0.01)]],
+      amount:            ['', [Validators.required, Validators.min(5)]],
       due_date:          ['', Validators.required],
       payment_method:    ['pix'],
       notes:             ['']
     });
+
+    this.chargeForm.get('payment_method')?.valueChanges.subscribe(method => {
+      const docControl = this.chargeForm.get('customer_document');
+      if (method === 'pix' || method === 'boleto') {
+        docControl?.setValidators([Validators.required]);
+      } else {
+        docControl?.clearValidators();
+      }
+      docControl?.updateValueAndValidity();
+    });
+
+    this.chargeForm.get('payment_method')?.setValue('pix');
+
+    this.chargeForm.get('client_id')?.valueChanges.subscribe(clientId => {
+      if (clientId) {
+        const client = this.clients.find(c => c.id == clientId);
+        if (client) {
+          this.chargeForm.patchValue({
+            customer_name:     client.name,
+            customer_email:    client.email || '',
+            customer_document: client.document || ''
+          }, { emitEvent: false });
+        }
+      }
+    });
+  }
+
+  loadClients(): void {
+    this.clientService.getAll().subscribe({
+      next: (data) => this.clients = data
+    });
+  }
+
+  formatDocument(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
+
+    if (value.length <= 11) {
+      value = value
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+      value = value
+        .replace(/(\d{2})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1/$2')
+        .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    }
+
+    input.value = value;
+    this.chargeForm.get('customer_document')?.setValue(value);
+  }
+
+  get documentInvalid(): boolean {
+    const control = this.chargeForm.get('customer_document');
+    return !!control && control.invalid && control.touched;
   }
 
   loadCharges(): void {
@@ -53,9 +115,7 @@ export class Charges implements OnInit {
         this.applyFilter();
         this.isLoading = false;
       },
-      error: () => {
-        this.isLoading = false;
-      }
+      error: () => { this.isLoading = false; }
     });
   }
 

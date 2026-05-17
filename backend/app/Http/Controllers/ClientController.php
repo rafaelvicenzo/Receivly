@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Client;
+use App\Services\AsaasService;
 
 class ClientController extends Controller
 {
+    private AsaasService $asaas;
+
+    public function __construct(AsaasService $asaas)
+    {
+        $this->asaas = $asaas;
+    }
+
     public function index(Request $request)
     {
         $query = $request->user()->clients()->orderBy('name');
@@ -56,6 +64,21 @@ class ClientController extends Controller
             'status'        => 'active',
             'notes'         => $request->notes,
         ]);
+
+        try {
+            $asaasCustomer = $this->asaas->createCustomer([
+                'name'     => $client->name,
+                'email'    => $client->email,
+                'phone'    => $client->phone,
+                'document' => $client->document,
+            ]);
+
+            if (isset($asaasCustomer['id'])) {
+                $client->update(['asaas_customer_id' => $asaasCustomer['id']]);
+            }
+        } catch (\Exception $e) {
+            // Não bloqueia o cadastro se o Asaas falhar
+        }
 
         return response()->json($client, 201);
     }

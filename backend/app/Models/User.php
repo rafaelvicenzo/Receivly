@@ -43,4 +43,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Client::class);
     }
+
+    public function collectionRules()
+    {
+        return $this->hasMany(CollectionRule::class);
+    }
 }

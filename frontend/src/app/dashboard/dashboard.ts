@@ -1,76 +1,90 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DashboardService, DashboardMetrics } from '../services/dashboard';
+import { AiChatService } from '../services/ai-chat';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
+  metrics!: DashboardMetrics;
+  isLoading = true;
+  chatMessages: { role: string; content: string }[] = [];
+  chatInput = '';
+  isTyping = false;
 
-  metrics = [
-    {
-      label: 'Total a Receber',
-      value: 'R$ 48.320,00',
-      change: '+12,4%',
-      positive: true,
-      icon: 'trending-up',
-      color: 'green',
-      sub: 'em cobranças ativas'
+  constructor(
+    private dashboardService: DashboardService,
+    private aiChatService: AiChatService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.loadMetrics();
+  }
+
+  loadMetrics(): void {
+    this.dashboardService.getMetrics().subscribe({
+      next: (data) => {
+        this.metrics = data;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
+
+  sendMessage(): void {
+  if (!this.chatInput.trim() || this.isTyping) return;
+
+  const userMessage = this.chatInput.trim();
+  this.chatMessages.push({ role: 'user', content: userMessage });
+  this.chatInput = '';
+  this.isTyping = true;
+  this.cdr.detectChanges();
+
+  this.aiChatService.sendMessage(userMessage).subscribe({
+    next: (res) => {
+      this.chatMessages.push({ role: 'bot', content: res.response });
+      this.isTyping = false;
+      this.cdr.detectChanges();
     },
-    {
-      label: 'Cobranças Vencidas',
-      value: 'R$ 8.750,00',
-      change: '-3,2%',
-      positive: false,
-      icon: 'alert-circle',
-      color: 'red',
-      sub: '14 cobranças em atraso'
-    },
-    {
-      label: 'Recebido no Mês',
-      value: 'R$ 21.490,00',
-      change: '+8,1%',
-      positive: true,
-      icon: 'check-circle',
-      color: 'blue',
-      sub: 'de R$ 27.000 esperados'
-    },
-    {
-      label: 'Taxa de Inadimplência',
-      value: '6,3%',
-      change: '-1,1%',
-      positive: true,
-      icon: 'chart-pie',
-      color: 'amber',
-      sub: 'abaixo da média do setor'
+    error: () => {
+      this.chatMessages.push({ role: 'bot', content: 'Erro ao processar sua pergunta. Tente novamente.' });
+      this.isTyping = false;
+      this.cdr.detectChanges();
     }
-  ];
+  });
+}
 
-  recentCharges = [
-    { client: 'Empresa Alpha Ltda', value: 'R$ 3.200,00', due: '15/05/2026', status: 'pago' },
-    { client: 'Beta Comércio S.A.', value: 'R$ 1.850,00', due: '18/05/2026', status: 'pendente' },
-    { client: 'Gama Serviços ME', value: 'R$ 720,00', due: '10/05/2026', status: 'vencido' },
-    { client: 'Delta Indústria', value: 'R$ 5.400,00', due: '20/05/2026', status: 'pendente' },
-    { client: 'Epsilon Tech', value: 'R$ 980,00', due: '08/05/2026', status: 'vencido' },
-  ];
+  askSuggestion(question: string): void {
+    this.chatInput = question;
+    this.sendMessage();
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+  }
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      pago: 'status-pago',
-      pendente: 'status-pendente',
-      vencido: 'status-vencido'
+      paid: 'status-pago',
+      pending: 'status-pendente',
+      overdue: 'status-vencido'
     };
     return map[status] || '';
   }
 
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
-      pago: 'Pago',
-      pendente: 'Pendente',
-      vencido: 'Vencido'
+      paid: 'Pago',
+      pending: 'Pendente',
+      overdue: 'Vencido'
     };
     return map[status] || status;
   }

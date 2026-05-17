@@ -139,10 +139,13 @@
       </div>
 
       <div class="col-risk">
-        <div class="risk-badge" [ngClass]="'risk-' + getRiskScore(client)">
-          <span class="risk-dot"></span>
-          {{ getRiskLabel(getRiskScore(client)) }}
-        </div>
+        <ng-container *ngIf="getScore(client.id!)">
+          <div class="risk-badge" [ngClass]="'risk-' + getScore(client.id!)?.risk">
+            <span class="risk-dot"></span>
+            {{ getScore(client.id!)?.score }}/100 — {{ getScore(client.id!)?.risk_label }}
+          </div>
+        </ng-container>
+        <span *ngIf="!getScore(client.id!)" class="text-muted">Calculando...</span>
       </div>
 
       <div class="col-actions" (click)="$event.stopPropagation()">
@@ -221,11 +224,37 @@
         </div>
 
         <div class="drawer-section">
-          <h4>Score de Risco IA</h4>
-          <div class="risk-badge large" [ngClass]="'risk-' + getRiskScore(selectedClient)">
-            <span class="risk-dot"></span>
-            {{ getRiskLabel(getRiskScore(selectedClient)) }}
-          </div>
+          <h4>Score de Risco</h4>
+
+          <div class="loading-score" *ngIf="isLoadingScore">Calculando score...</div>
+
+          <ng-container *ngIf="!isLoadingScore && selectedClientScore">
+            <div class="score-display">
+              <div class="score-circle" [ngClass]="'circle-' + selectedClientScore.risk">
+                <span class="score-number">{{ selectedClientScore.score }}</span>
+                <span class="score-max">/100</span>
+              </div>
+              <div class="score-info">
+                <span class="score-label" [ngClass]="'risk-' + selectedClientScore.risk">
+                  {{ selectedClientScore.risk_label }}
+                </span>
+                <div class="score-stats">
+                  <span>{{ selectedClientScore.paid }} pagas</span>
+                  <span>{{ selectedClientScore.overdue }} vencidas</span>
+                  <span>{{ selectedClientScore.pending }} pendentes</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="score-analysis">{{ selectedClientScore.analysis }}</p>
+
+            <div class="score-factors" *ngIf="selectedClientScore.factors && selectedClientScore.factors.length > 0">
+              <div class="factor-item" *ngFor="let factor of selectedClientScore.factors">
+                <span class="factor-dot" [ngClass]="'dot-' + selectedClientScore.risk"></span>
+                {{ factor }}
+              </div>
+            </div>
+          </ng-container>
         </div>
 
         <div class="drawer-section" *ngIf="selectedClient.notes">
