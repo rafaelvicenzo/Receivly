@@ -107,23 +107,6 @@
             E-mail inválido
           </span>
         </div>
-
-        <div class="form-group">
-          <label for="phone">Telefone <span class="optional">(opcional)</span></label>
-          <div class="input-wrapper" [class.focused]="phoneFocused">
-            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M18 14.5v2.08c0 .52-.23 1.01-.63 1.34a1.87 1.87 0 0 1-1.4.4 16.87 16.87 0 0 1-7.36-2.62 16.6 16.6 0 0 1-5.11-5.11A16.87 16.87 0 0 1 .88 3.03c-.04-.5.1-1 .4-1.4.33-.4.82-.63 1.34-.63H4.7c.49 0 .94.2 1.27.56.3.33.46.78.4 1.27a10.65 10.65 0 0 0 .57 2.42c.1.32.04.67-.18.92L5.32 8.1a13.74 13.74 0 0 0 5.11 5.11l1.93-1.35c.25-.22.6-.28.92-.18.78.26 1.57.44 2.42.57.49.06.94-.1 1.27-.4.36-.33.56-.78.56-1.27v1.89c2.49 0 4.5 2.01 4.5 4.5z" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <input
-              type="tel"
-              id="phone"
-              formControlName="phone"
-              placeholder="(11) 99999-9999"
-              (focus)="phoneFocused = true"
-              (blur)="phoneFocused = false">
-          </div>
-        </div>
-
         <div class="form-group">
           <label for="password">Senha</label>
           <div class="input-wrapper" [class.focused]="passwordFocused" [class.error]="passwordInvalid">
@@ -184,16 +167,30 @@
           <span class="error-message" *ngIf="confirmInvalid">
             Confirme sua senha
           </span>
-        </div>
+          <span class="error-message" *ngIf="passwordMismatch">
+            As senhas não coincidem
+          </span>
+          </div>
 
-        <label class="checkbox-wrapper" (click)="toggleTerms()">
-          <input type="checkbox" [checked]="acceptTerms">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" [(ngModel)]="acceptTerms" [ngModelOptions]="{standalone: true}">
           <span class="checkmark"></span>
-          <span class="checkbox-label">Eu aceito os <a href="#" class="terms-link">Termos de Uso</a> e <a href="#" class="terms-link">Política de Privacidade</a></span>
+          <span class="checkbox-label">
+            Eu aceito os <a href="#" class="terms-link">Termos de Uso</a>
+            e <a href="#" class="terms-link">Política de Privacidade</a>
+          </span>
         </label>
 
-        <button type="submit" class="btn-primary" [disabled]="signupForm.invalid || !acceptTerms">
-          Criar conta
+        <div class="message-box error-box" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+        
+        <div class="message-box success-box" *ngIf="successMessage">
+          {{ successMessage }}
+        </div>
+        
+        <button type="submit" class="btn-primary">
+          {{ isLoading ? 'Criando conta...' : 'Criar conta' }}
         </button>
 
         <div class="divider">
