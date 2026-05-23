@@ -2,19 +2,20 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth';
+import { NotificationBellComponent } from '../components/notification-bell/notification-bell';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NotificationBellComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.scss'
 })
 export class Layout {
   sidebarOpen = true;
-  currentPage = '';
+  currentPage = 'dashboard';
 
-  user = JSON.parse(localStorage.getItem('user') || '{}');
+  user = JSON.parse(localStorage.getItem('user') || '{"name":"Rafael"}');
 
   constructor(private authService: AuthService, private router: Router) {
     this.router.events.subscribe(() => {
@@ -24,7 +25,7 @@ export class Layout {
       else if (url.includes('charges')) this.currentPage = 'cobrancas';
       else if (url.includes('clients')) this.currentPage = 'clientes';
       else if (url.includes('reports')) this.currentPage = 'relatorios';
-      else if (url.includes('pix')) this.currentPage = 'pix';
+      else if (url.includes('ruler')) this.currentPage = 'ruler';
       else if (url.includes('settings')) this.currentPage = 'configuracoes';
     });
   }

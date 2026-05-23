@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ChargeService, Charge } from '../services/charge';
 import { ClientService, Client } from '../services/client';
+import { ChargesSkeletonComponent } from './charges-skeleton/charges-skeleton';
 
 @Component({
   selector: 'app-charges',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ChargesSkeletonComponent],
   templateUrl: './charges.html',
   styleUrl: './charges.scss'
 })
@@ -27,7 +28,8 @@ export class Charges implements OnInit {
   constructor(
     private chargeService: ChargeService,
     private clientService: ClientService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -108,14 +110,18 @@ export class Charges implements OnInit {
   }
 
   loadCharges(): void {
-    this.isLoading = true;
-    this.chargeService.getAll().subscribe({
-      next: (data) => {
-        this.charges = data;
-        this.applyFilter();
-        this.isLoading = false;
-      },
-      error: () => { this.isLoading = false; }
+  this.isLoading = true;
+  this.chargeService.getAll().subscribe({
+    next: (data) => {
+      this.charges = data;
+      this.applyFilter();
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
     });
   }
 

@@ -1,250 +1,333 @@
-<div class="content">
-  <div class="loading-state" *ngIf="isLoading">Carregando métricas...</div>
+<app-dashboard-skeleton *ngIf="isLoading"></app-dashboard-skeleton>
 
-  <ng-container *ngIf="!isLoading">
+<div class="dash-content" *ngIf="!isLoading">
 
-    <!-- METRICS GRID -->
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Total a Receber</span>
-          <div class="metric-icon icon-green">
+  <!-- GREETING -->
+  <div class="greeting">
+    <h1>Bom dia, {{ userName }}!</h1>
+    <p>Aqui está o resumo das suas cobranças.</p>
+  </div>
+
+  <!-- METRICS GRID -->
+  <div class="metrics-grid">
+    <div class="metric-card" *ngFor="let m of metricCards">
+      <div class="metric-top">
+        <span class="metric-label">{{ m.label }}</span>
+        <div class="metric-icon" [ngClass]="'icon-' + m.color">
+          <ng-container *ngIf="m.icon === 'wallet'">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-              <polyline points="17 6 23 6 23 12"/>
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
             </svg>
-          </div>
-        </div>
-        <div class="metric-value">{{ formatCurrency(metrics.total_pending) }}</div>
-        <div class="metric-bottom">
-          <span class="metric-sub">em cobranças pendentes</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Cobranças Vencidas</span>
-          <div class="metric-icon icon-red">
+          </ng-container>
+          <ng-container *ngIf="m.icon === 'alert'">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-          </div>
-        </div>
-        <div class="metric-value">{{ formatCurrency(metrics.total_overdue) }}</div>
-        <div class="metric-bottom">
-          <span class="metric-change negative" *ngIf="metrics.overdue_count > 0">
-            {{ metrics.overdue_count }} em atraso
-          </span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Recebido no Mês</span>
-          <div class="metric-icon icon-blue">
+          </ng-container>
+          <ng-container *ngIf="m.icon === 'credit-card'">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
             </svg>
-          </div>
-        </div>
-        <div class="metric-value">{{ formatCurrency(metrics.total_paid_month) }}</div>
-        <div class="metric-bottom">
-          <span class="metric-sub">pagamentos confirmados</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Taxa de Inadimplência</span>
-          <div class="metric-icon icon-amber">
+          </ng-container>
+          <ng-container *ngIf="m.icon === 'chart'">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
-              <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
             </svg>
-          </div>
-        </div>
-        <div class="metric-value">{{ metrics.inadimplencia }}%</div>
-        <div class="metric-bottom">
-          <span class="metric-sub">{{ metrics.total_clients }} clientes cadastrados</span>
+          </ng-container>
         </div>
       </div>
-    </div>
-
-    <!-- BOTTOM GRID -->
-    <div class="bottom-grid">
-
-      <!-- RECENT CHARGES -->
-      <div class="card table-card">
-        <div class="card-header">
-          <h3>Cobranças Recentes</h3>
-          <button class="ver-todas">Ver todas</button>
-        </div>
-        <table class="charges-table">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Valor</th>
-              <th>Vencimento</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="metrics.recent_charges.length === 0">
-              <td colspan="4" style="text-align:center; color:#94a3b8; padding: 24px;">Nenhuma cobrança ainda.</td>
-            </tr>
-            <tr *ngFor="let c of metrics.recent_charges">
-              <td class="client-cell">
-                <div class="client-avatar">{{ c.customer_name.charAt(0) }}</div>
-                <span>{{ c.customer_name }}</span>
-              </td>
-              <td class="value-cell">{{ formatCurrency(c.amount) }}</td>
-              <td class="date-cell">{{ c.due_date | date:'dd/MM/yyyy' }}</td>
-              <td>
-                <span class="status-badge" [ngClass]="getStatusClass(c.status)">
-                  {{ getStatusLabel(c.status) }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="metric-value">{{ m.value }}</div>
+      <div class="metric-bottom">
+        <span class="metric-change" [class.positive]="m.positive" [class.negative]="!m.positive">
+          {{ m.change || m.sub }}
+        </span>
       </div>
-
-      <!-- QUICK ACTIONS -->
-      <div class="card actions-card">
-        <div class="card-header">
-          <h3>Ações Rápidas</h3>
-        </div>
-        <div class="actions-list">
-          <button class="action-item">
-            <div class="action-icon icon-blue">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-            </div>
-            <div class="action-text">
-              <span class="action-title">Nova Cobrança</span>
-              <span class="action-desc">Criar cobrança manual</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-          <button class="action-item">
-            <div class="action-icon icon-green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <div class="action-text">
-              <span class="action-title">Gerar Pix</span>
-              <span class="action-desc">Cobrança via Pix</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-          <button class="action-item">
-            <div class="action-icon icon-amber">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-              </svg>
-            </div>
-            <div class="action-text">
-              <span class="action-title">Emitir Boleto</span>
-              <span class="action-desc">Boleto bancário</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-          <button class="action-item">
-            <div class="action-icon icon-red">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.35 2 2 0 0 1 3.91 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.99 6l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-            </div>
-            <div class="action-text">
-              <span class="action-title">Régua de Cobrança</span>
-              <span class="action-desc">Automatizar notificações</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-          <button class="action-item">
-            <div class="action-icon icon-purple">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div class="action-text">
-              <span class="action-title">Novo Cliente</span>
-              <span class="action-desc">Cadastrar cliente</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- AI CHAT -->
-<div class="ai-chat-card">
-  <div class="ai-chat-header">
-    <div class="ai-icon">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-    </div>
-    <div>
-      <h3>Assistente IA</h3>
-      <p>Pergunte sobre suas cobranças e clientes</p>
     </div>
   </div>
 
-  <div class="ai-messages" #messagesContainer>
-    <div class="ai-message bot" *ngIf="chatMessages.length === 0">
-      <p>Olá! Sou seu assistente financeiro. Posso te ajudar com análises de cobranças, inadimplência e insights sobre seus clientes. O que deseja saber?</p>
+  <!-- MIDDLE ROW: CHART + QUICK ACTIONS -->
+  <div class="middle-row">
+
+    <!-- CHART -->
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Recebimentos nos últimos 30 dias</h3>
+        <div class="chart-filter">
+          <span>Últimos 30 dias</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+      <div class="chart-body">
+        <svg viewBox="0 0 580 135" class="chart-svg">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a6cf6" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#1a6cf6" stop-opacity="0.01"/>
+            </linearGradient>
+            <filter id="tooltipShadow">
+              <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="rgba(0,0,0,0.1)"/>
+            </filter>
+          </defs>
+
+          <line *ngFor="let gl of yGridLines"
+            x1="50" x2="560"
+            [attr.y1]="gl.y" [attr.y2]="gl.y"
+            stroke="#eef0f6" stroke-width="1"/>
+
+          <text *ngFor="let gl of yGridLines"
+            x="42" [attr.y]="gl.y + 3"
+            text-anchor="end" fill="#64748b" font-size="7" font-family="Sora, sans-serif">
+            {{ gl.value }}
+          </text>
+
+          <text *ngFor="let xl of xLabels"
+            [attr.x]="xl.x" y="127"
+            text-anchor="middle" fill="#64748b" font-size="7" font-family="Sora, sans-serif">
+            {{ xl.label }}
+          </text>
+
+          <path [attr.d]="areaPath" fill="url(#chartGrad)"/>
+          <path [attr.d]="linePath" fill="none" stroke="#1a6cf6" stroke-width="2" stroke-linecap="round"/>
+
+          <g class="chart-point" *ngFor="let pt of chartPoints">
+            <circle class="chart-dot" [attr.cx]="pt.cx" [attr.cy]="pt.cy" r="3.5" fill="#fff" stroke="#1a6cf6" stroke-width="2"/>
+            <g class="chart-tooltip" [attr.transform]="'translate(' + (pt.cx - 40) + ',' + (pt.cy - 52) + ')'">
+              <rect width="80" height="36" rx="5" fill="#fff" filter="url(#tooltipShadow)"/>
+              <text x="40" y="14" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a" font-family="Sora, sans-serif">{{ pt.label }}</text>
+              <circle cx="13" cy="26" r="2.5" fill="#1a6cf6"/>
+              <text x="20" y="28" font-size="7" font-weight="600" fill="#334155" font-family="Sora, sans-serif">{{ pt.displayValue }}</text>
+            </g>
+          </g>
+        </svg>
+      </div>
     </div>
-    <div *ngFor="let msg of chatMessages" class="ai-message" [ngClass]="msg.role">
-      <p>{{ msg.content }}</p>
+
+    <!-- QUICK ACTIONS -->
+    <div class="card actions-card">
+      <div class="card-header">
+        <h3>Ações rápidas</h3>
+      </div>
+      <div class="actions-list">
+
+        <button class="action-item">
+          <div class="action-icon icon-blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Nova Cobrança</span>
+            <span class="action-desc">Criar cobrança manual</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <button class="action-item">
+          <div class="action-icon icon-green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Gerar Pix</span>
+            <span class="action-desc">Cobrança via Pix</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <button class="action-item">
+          <div class="action-icon icon-amber">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Emitir Boleto</span>
+            <span class="action-desc">Boleto bancário</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <button class="action-item">
+          <div class="action-icon icon-purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.35 2 2 0 0 1 3.91 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.99 6l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Régua de Cobrança</span>
+            <span class="action-desc">Automatizar notificações</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <button class="action-item">
+          <div class="action-icon icon-red">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Novo Cliente</span>
+            <span class="action-desc">Cadastrar cliente</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+      </div>
     </div>
-    <div class="ai-message bot" *ngIf="isTyping">
-      <p class="typing">Analisando dados...</p>
-    </div>
+
   </div>
 
-  <div class="ai-input-row">
-    <input
-      type="text"
-      [(ngModel)]="chatInput"
-      placeholder="Quem são meus piores pagadores?"
-      class="ai-input"
-      (keyup.enter)="sendMessage()"
-      [disabled]="isTyping">
-    <button class="ai-send-btn" (click)="sendMessage()" [disabled]="isTyping || !chatInput.trim()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="22" y1="2" x2="11" y2="13"/>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-      </svg>
-    </button>
+  <!-- BOTTOM ROW: TABLE + AI ASSISTANT -->
+  <div class="bottom-row">
+
+    <!-- TABLE -->
+    <div class="card table-card">
+      <div class="card-header">
+        <h3>Cobranças Recentes</h3>
+        <button class="ver-todas">Ver todas</button>
+      </div>
+      <table class="charges-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="recentCharges.length === 0">
+            <td colspan="5" style="text-align:center; color:#94a3b8; padding:24px;">
+              Nenhuma cobrança ainda.
+            </td>
+          </tr>
+          <tr *ngFor="let c of recentCharges">
+            <td>
+              <div class="client-cell">
+                <div class="client-avatar">{{ c.initials }}</div>
+                <span>{{ c.client }}</span>
+              </div>
+            </td>
+            <td class="value-cell">{{ c.value }}</td>
+            <td class="date-cell">
+              <div class="due-date">{{ c.due }}</div>
+              <div class="due-overdue" *ngIf="c.status === 'overdue'">
+                {{ c.overdueDays }} dias em atraso
+              </div>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(c.status)">
+                {{ getStatusLabel(c.status) }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn" *ngIf="c.status === 'overdue'">
+                Cobrar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AI ASSISTANT -->
+    <div class="card ai-assistant-card">
+      <div class="ai-header">
+        <div class="ai-title-row">
+          <h3 class="ai-title">Assistente IA</h3>
+          <span class="ai-badge">BETA</span>
+        </div>
+        <p class="ai-desc">Pergunte sobre cobranças, clientes e relatórios.</p>
+      </div>
+
+      <div class="ai-messages" #messagesContainer>
+        <div *ngIf="chatMessages.length === 0" class="ai-empty">
+          <div class="ai-suggestion-grid">
+            <button class="ai-suggestion" (click)="askSuggestion('Quais clientes mais atrasam?')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <path d="M9 18h6"/><path d="M10 22h4"/>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+              </svg>
+              <span>Quais clientes mais atrasam?</span>
+            </button>
+            <button class="ai-suggestion" (click)="askSuggestion('Quanto recebi este mês?')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              <span>Quanto recebi este mês?</span>
+            </button>
+          </div>
+        </div>
+
+        <ng-container *ngFor="let msg of chatMessages">
+          <div class="ai-bubble" [class.user-bubble]="msg.role === 'user'" [class.bot-bubble]="msg.role === 'bot'">
+            <div class="bubble-avatar" *ngIf="msg.role === 'bot'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+              </svg>
+            </div>
+            <div class="bubble-text">{{ msg.content }}</div>
+          </div>
+        </ng-container>
+
+        <div class="ai-typing" *ngIf="isTyping">
+          <div class="bubble-avatar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+            </svg>
+          </div>
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+
+      <div class="ai-input-area">
+        <div class="ai-input-row">
+          <input
+            type="text"
+            class="ai-input"
+            placeholder="Digite sua pergunta..."
+            [(ngModel)]="chatInput"
+            (keyup.enter)="sendMessage()">
+          <button class="ai-send" (click)="sendMessage()" [disabled]="isTyping">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polyline points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="ai-suggestions">
-    <button class="suggestion-chip" (click)="askSuggestion('Quem são meus 3 piores pagadores?')">Piores pagadores</button>
-    <button class="suggestion-chip" (click)="askSuggestion('Qual minha taxa de inadimplência atual?')">Inadimplência</button>
-    <button class="suggestion-chip" (click)="askSuggestion('Quanto recebi esse mês?')">Recebido no mês</button>
-    <button class="suggestion-chip" (click)="askSuggestion('Qual cliente tem maior risco?')">Maior risco</button>
-  </div>
-</div>
-  </ng-container>
 </div>

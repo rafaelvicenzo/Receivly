@@ -10,10 +10,14 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\Api\NotificationController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/webhook/asaas', [WebhookController::class, 'asaas']);
+Route::get('/auth/{provider}/redirect',  [SocialAuthController::class, 'redirect']);
+Route::get('/auth/{provider}/callback',  [SocialAuthController::class, 'callback']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/metrics', [DashboardController::class, 'metrics']);
@@ -41,4 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/score/all', [ScoreController::class, 'calculateForAll']);
     Route::post('/ai/chat', [AiChatController::class, 'chat']);
     Route::get('/reports', [ReportController::class, 'index']);
+
+    Route::get('/dashboard/chart', [DashboardController::class, 'chartData']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });

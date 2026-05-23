@@ -43,4 +43,25 @@ class DashboardController extends Controller
             'recent_charges'     => $recentCharges,
         ]);
     }
+
+    public function chartData(Request $request)
+{
+    $user = $request->user();
+    $days = [];
+
+    for ($i = 29; $i >= 0; $i--) {
+        $date = Carbon::now()->subDays($i);
+        $received = $user->charges()
+            ->where('status', 'paid')
+            ->whereDate('paid_at', $date)
+            ->sum('amount');
+
+        $days[] = [
+            'label' => $date->format('d/m'),
+            'value' => (float) $received,
+        ];
+    }
+
+    return response()->json($days);
+}
 }

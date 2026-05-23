@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 
 export interface DashboardMetrics {
+  total_received: number;
   total_pending: number;
   total_overdue: number;
   total_paid_month: number;
@@ -24,5 +25,9 @@ export class DashboardService {
 
   getMetrics(): Observable<DashboardMetrics> {
     return this.http.get<DashboardMetrics>(`${this.apiUrl}/dashboard/metrics`);
+  }
+
+  getChartData(): Observable<{ label: string; value: number }[]> {
+    return this.http.get<{ label: string; value: number }[]>(`${this.apiUrl}/dashboard/chart`);
   }
 }

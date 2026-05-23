@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
+  if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
 
@@ -60,6 +60,7 @@ export class LoginComponent implements OnInit {
 
       this.authService.login(email, password).subscribe({
         next: () => {
+          this.isLoading = false;
           this.router.navigate(['/dashboard']);
         },
         error: (err) => {
@@ -73,10 +74,10 @@ export class LoginComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
-    console.log('Login with Google');
+  window.location.href = 'http://localhost:8000/api/auth/google/redirect';
   }
 
-  loginWithMicrosoft(): void {
-    console.log('Login with Microsoft');
+loginWithMicrosoft(): void {
+  window.location.href = 'http://localhost:8000/api/auth/microsoft/redirect';
   }
 }

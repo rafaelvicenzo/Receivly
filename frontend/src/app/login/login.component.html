@@ -6,7 +6,7 @@
           <rect width="40" height="40" rx="8" fill="white" fill-opacity="0.2"/>
           <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="logo-text">Cobrança Smart</span>
+        <span class="logo-text">Receivly</span>
       </div>
 
       <div class="hero-text">
@@ -120,12 +120,22 @@
             <span class="checkmark"></span>
             <span class="checkbox-label">Lembrar-me</span>
           </label>
-          <a href="#" class="forgot-password">Esqueci minha senha</a>
+          <a routerLink="/forgot-password" class="forgot-password">Esqueci minha senha</a>
         </div>
 
-        <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
-          Entrar
+        <button type="submit" class="btn-primary" [disabled]="loginForm.invalid || isLoading">
+          <span class="btn-content" *ngIf="!isLoading">Entrar</span>
+          <span class="btn-content loading" *ngIf="isLoading">
+            <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            Entrando...
+          </span>
         </button>
+        <div class="message-box error-box" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
 
         <div class="divider">
           <span>ou continue com</span>
@@ -154,7 +164,7 @@
 
         <div class="register-link">
           <span>Não tem uma conta?</span>
-          <a href="#">Cadastre-se</a>
+          <a routerLink="/signup">Cadastre-se</a>
         </div>
       </form>
     </div>
