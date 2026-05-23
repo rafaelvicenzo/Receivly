@@ -12,9 +12,9 @@ import { AuthService } from '../services/auth';
 })
 export class Layout {
   sidebarOpen = true;
-  currentPage = '';
+  currentPage = 'dashboard';
 
-  user = JSON.parse(localStorage.getItem('user') || '{}');
+  user = JSON.parse(localStorage.getItem('user') || '{"name":"Rafael"}');
 
   constructor(private authService: AuthService, private router: Router) {
     this.router.events.subscribe(() => {
@@ -23,7 +23,7 @@ export class Layout {
       else if (url.includes('charges')) this.currentPage = 'cobrancas';
       else if (url.includes('clients')) this.currentPage = 'clientes';
       else if (url.includes('reports')) this.currentPage = 'relatorios';
-      else if (url.includes('pix')) this.currentPage = 'pix';
+      else if (url.includes('ruler')) this.currentPage = 'ruler';
       else if (url.includes('settings')) this.currentPage = 'configuracoes';
     });
   }
@@ -45,6 +45,7 @@ export class Layout {
       clientes: '/clients',
       relatorios: '/reports',
       pix: '/pix',
+      ruler: '/ruler',
       configuracoes: '/settings'
     };
     if (routes[page]) {

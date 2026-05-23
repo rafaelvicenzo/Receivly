@@ -1,82 +1,117 @@
-<div class="content">
+<div class="dash-content">
+
+  <!-- GREETING -->
+  <div class="greeting">
+    <h1>Bom dia, {{ userName }}! 👋</h1>
+    <p>Aqui está o resumo das suas cobranças.</p>
+  </div>
 
   <!-- METRICS GRID -->
   <div class="metrics-grid">
-    <div class="metric-card" *ngFor="let m of metrics" [ngClass]="'card-' + m.color">
+    <div class="metric-card" *ngFor="let m of metrics">
       <div class="metric-top">
         <span class="metric-label">{{ m.label }}</span>
         <div class="metric-icon" [ngClass]="'icon-' + m.color">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <ng-container *ngIf="m.icon === 'trending-up'">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-              <polyline points="17 6 23 6 23 12"/>
-            </ng-container>
-            <ng-container *ngIf="m.icon === 'alert-circle'">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </ng-container>
-            <ng-container *ngIf="m.icon === 'check-circle'">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </ng-container>
-            <ng-container *ngIf="m.icon === 'chart-pie'">
-              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
-              <path d="M22 12A10 10 0 0 0 12 2v10z"/>
-            </ng-container>
-          </svg>
+          <ng-container *ngIf="m.icon === 'wallet'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+            </svg>
+          </ng-container>
+          <ng-container *ngIf="m.icon === 'alert'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </ng-container>
+          <ng-container *ngIf="m.icon === 'credit-card'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+          </ng-container>
+          <ng-container *ngIf="m.icon === 'chart'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </ng-container>
         </div>
       </div>
       <div class="metric-value">{{ m.value }}</div>
       <div class="metric-bottom">
-        <span class="metric-change" [ngClass]="m.positive ? 'positive' : 'negative'">
-          {{ m.change }}
+        <span class="metric-change" [class.positive]="m.positive" [class.negative]="!m.positive">
+          {{ m.change || m.sub }}
         </span>
-        <span class="metric-sub">{{ m.sub }}</span>
       </div>
     </div>
   </div>
 
-  <!-- BOTTOM GRID -->
-  <div class="bottom-grid">
+  <!-- MIDDLE ROW: CHART + QUICK ACTIONS -->
+  <div class="middle-row">
 
-    <!-- RECENT CHARGES TABLE -->
-    <div class="card table-card">
-      <div class="card-header">
-        <h3>Cobranças Recentes</h3>
-        <button class="ver-todas">Ver todas</button>
+    <!-- CHART -->
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Recebimentos nos últimos 30 dias</h3>
+        <div class="chart-filter">
+          <span>Últimos 30 dias</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
       </div>
-      <table class="charges-table">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Valor</th>
-            <th>Vencimento</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let c of recentCharges">
-            <td class="client-cell">
-              <div class="client-avatar">{{ c.client.charAt(0) }}</div>
-              <span>{{ c.client }}</span>
-            </td>
-            <td class="value-cell">{{ c.value }}</td>
-            <td class="date-cell">{{ c.due }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="getStatusClass(c.status)">
-                {{ getStatusLabel(c.status) }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="chart-body">
+        <svg viewBox="0 0 580 135" class="chart-svg">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a6cf6" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#1a6cf6" stop-opacity="0.01"/>
+            </linearGradient>
+            <filter id="tooltipShadow">
+              <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="rgba(0,0,0,0.1)"/>
+            </filter>
+          </defs>
+          <!-- Y-axis grid lines -->
+          <line *ngFor="let gl of yGridLines"
+            x1="50" x2="560"
+            [attr.y1]="gl.y" [attr.y2]="gl.y"
+            stroke="#eef0f6" stroke-width="1"/>
+          <!-- Y-axis labels -->
+          <text *ngFor="let gl of yGridLines"
+            x="42" [attr.y]="gl.y + 3"
+            text-anchor="end" fill="#64748b" font-size="7" font-family="Sora, sans-serif">
+            {{ gl.value }}
+          </text>
+          <!-- X-axis labels -->
+          <text *ngFor="let xl of xLabels"
+            [attr.x]="xl.x" y="127"
+            text-anchor="middle" fill="#64748b" font-size="7" font-family="Sora, sans-serif">
+            {{ xl.label }}
+          </text>
+          <!-- Area -->
+          <path [attr.d]="areaPath" fill="url(#chartGrad)"/>
+          <!-- Line -->
+          <path [attr.d]="linePath" fill="none" stroke="#1a6cf6" stroke-width="2" stroke-linecap="round"/>
+          <!-- Points -->
+          <g class="chart-point" *ngFor="let pt of chartPoints">
+            <circle class="chart-dot" [attr.cx]="pt.cx" [attr.cy]="pt.cy" r="3.5" fill="#fff" stroke="#1a6cf6" stroke-width="2"/>
+            <g class="chart-tooltip" [attr.transform]="'translate(' + (pt.cx - 40) + ',' + (pt.cy - 52) + ')'">
+              <rect width="80" height="36" rx="5" fill="#fff" filter="url(#tooltipShadow)"/>
+              <text x="40" y="14" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a" font-family="Sora, sans-serif">{{ pt.label }}</text>
+              <circle cx="13" cy="26" r="2.5" fill="#1a6cf6"/>
+              <text x="20" y="28" font-size="7" font-weight="600" fill="#334155" font-family="Sora, sans-serif">{{ pt.displayValue }}</text>
+            </g>
+          </g>
+        </svg>
+      </div>
     </div>
 
     <!-- QUICK ACTIONS -->
     <div class="card actions-card">
       <div class="card-header">
-        <h3>Ações Rápidas</h3>
+        <h3>Ações rápidas</h3>
       </div>
       <div class="actions-list">
         <button class="action-item">
@@ -124,7 +159,7 @@
           </svg>
         </button>
         <button class="action-item">
-          <div class="action-icon icon-red">
+          <div class="action-icon icon-purple">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.35 2 2 0 0 1 3.91 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.99 6l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
             </svg>
@@ -138,7 +173,7 @@
           </svg>
         </button>
         <button class="action-item">
-          <div class="action-icon icon-purple">
+          <div class="action-icon icon-red">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
@@ -152,6 +187,89 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="action-arrow">
             <polyline points="9 18 15 12 9 6"/>
           </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ROW: TABLE + AI ASSISTANT -->
+  <div class="bottom-row">
+
+    <!-- TABLE -->
+    <div class="card table-card">
+      <div class="card-header">
+        <h3>Cobranças Recentes</h3>
+        <button class="ver-todas">Ver todas</button>
+      </div>
+      <table class="charges-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of recentCharges">
+            <td>
+              <div class="client-cell">
+                <div class="client-avatar">{{ c.initials }}</div>
+                <span>{{ c.client }}</span>
+              </div>
+            </td>
+            <td class="value-cell">{{ c.value }}</td>
+            <td class="date-cell">
+              <div class="due-date">{{ c.due }}</div>
+              <div class="due-overdue" *ngIf="c.status === 'vencido'">{{ c.overdueDays }} dias em atraso</div>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(c.status)">
+                {{ getStatusLabel(c.status) }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn" *ngIf="c.status === 'vencido'">
+                {{ c.overdueDays }} dias
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AI ASSISTANT -->
+    <div class="card ai-assistant-card">
+      <div class="ai-header">
+        <div class="ai-title-row">
+          <h3 class="ai-title">Assistente IA</h3>
+          <span class="ai-badge">BETA</span>
+        </div>
+        <p class="ai-desc">
+          Pergunte sobre cobranças, clientes e relatórios usando inteligência artificial.
+        </p>
+      </div>
+      <div class="ai-input-area">
+        <div class="ai-input-row">
+          <input type="text" class="ai-input" placeholder="Digite sua pergunta...">
+          <button class="ai-send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <button class="ai-suggestion">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M9 18h6"/>
+            <path d="M10 22h4"/>
+            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+            <path d="M12 3v1"/>
+            <path d="M18.36 5.64l-.7.7"/>
+            <path d="M5.64 5.64l.7.7"/>
+          </svg>
+          <span>Quais clientes mais atrasam?</span>
         </button>
       </div>
     </div>

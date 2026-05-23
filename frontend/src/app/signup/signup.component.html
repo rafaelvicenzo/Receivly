@@ -1,0 +1,231 @@
+<div class="login-container">
+  <div class="left-side">
+    <div class="brand-content">
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="8" fill="white" fill-opacity="0.2"/>
+          <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">Receivly</span>
+      </div>
+
+      <div class="glass-card card-user">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+
+      <div class="hero-text">
+        <h1>Comece agora com o Receivly</h1>
+        <p>Pare de perder tempo e dinheiro. Organize suas cobranças, receba seus pagamentos com facilidade e tenha mais controle financeiro todos os dias.</p>
+      </div>
+
+      <div class="illustration">
+        <div class="benefits-wrapper">
+          <div class="benefit-item">
+            <div class="benefit-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <span class="benefit-title">Seguro</span>
+            <span class="benefit-desc">Seus dados protegidos com segurança avançada</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <span class="benefit-title">Rápido</span>
+            <span class="benefit-desc">Crie sua conta e comece em poucos minutos.</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <span class="benefit-title">Simples</span>
+            <span class="benefit-desc">Gerencie pagamentos de forma simples e eficiente.</span>
+          </div>
+        </div>
+
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="floating-shape shape-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-side">
+    <div class="form-card">
+      <div class="form-header">
+        <h2>Cadastre-se</h2>
+        <p>Crie sua conta para começar</p>
+      </div>
+
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="name">Nome completo</label>
+          <div class="input-wrapper" [class.focused]="nameFocused" [class.error]="nameInvalid">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 18c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              placeholder="Seu nome completo"
+              (focus)="nameFocused = true"
+              (blur)="nameFocused = false">
+          </div>
+          <span class="error-message" *ngIf="nameInvalid">
+            Nome deve ter pelo menos 3 caracteres
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <div class="input-wrapper" [class.focused]="emailFocused" [class.error]="emailInvalid">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M2.5 6.667L10 11.667L17.5 6.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="2.5" y="4.167" width="15" height="11.666" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="seu@email.com"
+              (focus)="emailFocused = true"
+              (blur)="emailFocused = false">
+          </div>
+          <span class="error-message" *ngIf="emailInvalid">
+            E-mail inválido
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Telefone <span class="optional">(opcional)</span></label>
+          <div class="input-wrapper" [class.focused]="phoneFocused">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M18 14.5v2.08c0 .52-.23 1.01-.63 1.34a1.87 1.87 0 0 1-1.4.4 16.87 16.87 0 0 1-7.36-2.62 16.6 16.6 0 0 1-5.11-5.11A16.87 16.87 0 0 1 .88 3.03c-.04-.5.1-1 .4-1.4.33-.4.82-.63 1.34-.63H4.7c.49 0 .94.2 1.27.56.3.33.46.78.4 1.27a10.65 10.65 0 0 0 .57 2.42c.1.32.04.67-.18.92L5.32 8.1a13.74 13.74 0 0 0 5.11 5.11l1.93-1.35c.25-.22.6-.28.92-.18.78.26 1.57.44 2.42.57.49.06.94-.1 1.27-.4.36-.33.56-.78.56-1.27v1.89c2.49 0 4.5 2.01 4.5 4.5z" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <input
+              type="tel"
+              id="phone"
+              formControlName="phone"
+              placeholder="(11) 99999-9999"
+              (focus)="phoneFocused = true"
+              (blur)="phoneFocused = false">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <div class="input-wrapper" [class.focused]="passwordFocused" [class.error]="passwordInvalid">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6 9V6.333C6 4.492 7.492 3 9.333 3H10.667C12.508 3 14 4.492 14 6.333V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              (focus)="passwordFocused = true"
+              (blur)="passwordFocused = false">
+            <button type="button" class="toggle-password" (click)="togglePassword()">
+              <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4C4 4 1 10 1 10s3 6 9 6 9-6 9-6-3-6-9-6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M2 2L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M8.5 8.5C7.625 9.375 7 10.5 7 12C7 13.657 8.343 15 10 15C10.825 15 11.6 14.675 12.25 14.15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M10 4C4 4 1 10 1 10s1.325 2.378 3.5 3.878M15.5 13.878C17.675 12.378 19 10 19 10S16 4 10 4C9.175 4 8.375 4.125 7.625 4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <span class="error-message" *ngIf="passwordInvalid">
+            Senha deve ter pelo menos 6 caracteres
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar senha</label>
+          <div class="input-wrapper" [class.focused]="confirmFocused" [class.error]="confirmInvalid">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6 9V6.333C6 4.492 7.492 3 9.333 3H10.667C12.508 3 14 4.492 14 6.333V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input
+              [type]="showConfirm ? 'text' : 'password'"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="••••••••"
+              (focus)="confirmFocused = true"
+              (blur)="confirmFocused = false">
+            <button type="button" class="toggle-password" (click)="toggleConfirm()">
+              <svg *ngIf="!showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4C4 4 1 10 1 10s3 6 9 6 9-6 9-6-3-6-9-6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <svg *ngIf="showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M2 2L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M8.5 8.5C7.625 9.375 7 10.5 7 12C7 13.657 8.343 15 10 15C10.825 15 11.6 14.675 12.25 14.15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M10 4C4 4 1 10 1 10s1.325 2.378 3.5 3.878M15.5 13.878C17.675 12.378 19 10 19 10S16 4 10 4C9.175 4 8.375 4.125 7.625 4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <span class="error-message" *ngIf="confirmInvalid">
+            Confirme sua senha
+          </span>
+        </div>
+
+        <label class="checkbox-wrapper" (click)="toggleTerms()">
+          <input type="checkbox" [checked]="acceptTerms">
+          <span class="checkmark"></span>
+          <span class="checkbox-label">Eu aceito os <a href="#" class="terms-link">Termos de Uso</a> e <a href="#" class="terms-link">Política de Privacidade</a></span>
+        </label>
+
+        <button type="submit" class="btn-primary" [disabled]="signupForm.invalid || !acceptTerms">
+          Criar conta
+        </button>
+
+        <div class="divider">
+          <span>ou cadastre-se com</span>
+        </div>
+
+        <div class="social-buttons">
+          <button type="button" class="btn-social" (click)="loginWithGoogle()">
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+          <button type="button" class="btn-social" (click)="loginWithMicrosoft()">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="2" width="7" height="7" fill="#F25022"/>
+              <rect x="11" y="2" width="7" height="7" fill="#7FBA00"/>
+              <rect x="2" y="11" width="7" height="7" fill="#00A4EF"/>
+              <rect x="11" y="11" width="7" height="7" fill="#FFB900"/>
+            </svg>
+            Microsoft
+          </button>
+        </div>
+
+        <div class="register-link">
+          <span>Já tem uma conta?</span>
+          <a routerLink="/login">Faça login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
