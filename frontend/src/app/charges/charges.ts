@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ChargeService, Charge } from '../services/charge';
 import { ClientService, Client } from '../services/client';
 import { ChargesSkeletonComponent } from './charges-skeleton/charges-skeleton';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-charges',
@@ -29,13 +30,17 @@ export class Charges implements OnInit {
     private chargeService: ChargeService,
     private clientService: ClientService,
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadCharges();
     this.loadClients();
+    this.route.queryParams.subscribe(params => {
+    if (params['openModal']) this.openModal();
+  });
   }
 
   initForm(): void {

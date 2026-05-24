@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.3",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^2.10.1",
+        "league/csv": "^9.28",
         "socialiteproviders/microsoft-azure": "^5.2"
     },
     "require-dev": {

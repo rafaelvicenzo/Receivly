@@ -1,9 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DashboardService, DashboardMetrics } from '../services/dashboard';
 import { AiChatService } from '../services/ai-chat';
 import { DashboardSkeletonComponent } from './dashboard-skeleton/dashboard-skeleton';
+import { ClientService, ImportResult } from '../services/client';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +20,6 @@ export class Dashboard implements OnInit {
   chatMessages: { role: string; content: string }[] = [];
   chatInput = '';
   isTyping = false;
-  userName = '';
   recentCharges: any[] = [];
   chartData: { label: string; value: number }[] = [];
 
@@ -30,47 +31,52 @@ export class Dashboard implements OnInit {
   linePath = '';
   areaPath = '';
 
-  private chartWidth    = 580;
-  private chartHeight   = 135;
-  private chartPadLeft  = 50;
-  private chartPadRight = 20;
-  private chartPadTop   = 10;
+  // Modal importar CSV
+  showImportModal = false;
+  importFile: File | null = null;
+  importLoading = false;
+  importSuccess = '';
+  importError = '';
+
+  private chartWidth     = 580;
+  private chartHeight    = 135;
+  private chartPadLeft   = 50;
+  private chartPadRight  = 20;
+  private chartPadTop    = 10;
   private chartPadBottom = 20;
 
   constructor(
     private dashboardService: DashboardService,
     private aiChatService: AiChatService,
-    private cdr: ChangeDetectorRef
+    private clientService: ClientService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadMetrics();
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      try { this.userName = JSON.parse(stored)?.name || ''; } catch {}
-    }
   }
 
   loadMetrics(): void {
     this.dashboardService.getMetrics().subscribe({
       next: (data) => {
-  this.metrics = data;
-  this.recentCharges = (data.recent_charges || []).map((c: any) => ({
-    initials:    c.customer_name?.charAt(0)?.toUpperCase() || '?',
-    client:      c.customer_name,
-    value:       this.formatCurrency(+c.amount),
-    due:         new Date(c.due_date).toLocaleDateString('pt-BR'),
-    status:      c.status,
-    overdueDays: this.calcOverdueDays(c.due_date),
-  }));
-  this.metricCards = this.buildMetricCards(data);
-  this.isLoading = false;
-  this.cdr.detectChanges();
-},
-error: () => {
-  this.isLoading = false;
-  this.cdr.detectChanges();
-}
+        this.metrics = data;
+        this.recentCharges = (data.recent_charges || []).map((c: any) => ({
+        initials:    c.customer_name?.charAt(0)?.toUpperCase() || '?',
+        client:      c.customer_name,
+        value:       this.formatCurrency(+c.amount),
+        due:         new Date(c.due_date).toLocaleDateString('pt-BR'),
+        status:      c.status,
+        overdueDays: this.calcOverdueDays(c.due_date),
+      })).slice(0, 5);
+        this.metricCards = this.buildMetricCards(data);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
 
     this.dashboardService.getChartData().subscribe({
@@ -87,7 +93,81 @@ error: () => {
     });
   }
 
-  // ─── Metric cards ────────────────────────────────────────────────────────────
+  // ─── Quick Actions ────────────────────────────────────────────────────────────
+
+  goToNewCharge(): void {
+    this.router.navigate(['/charges'], { queryParams: { openModal: true } });
+  }
+
+  goToNewClient(): void {
+    this.router.navigate(['/clients'], { queryParams: { openModal: true } });
+  }
+
+  goToCollectionRules(): void {
+    this.router.navigate(['/collection-rules']);
+  }
+
+  goToReports(): void {
+    this.router.navigate(['/reports']);
+  }
+
+  goToCharges(): void {
+  this.router.navigate(['/charges']);
+  }
+
+  openImportModal(): void {
+    this.importFile = null;
+    this.importSuccess = '';
+    this.importError = '';
+    this.showImportModal = true;
+  }
+
+  closeImportModal(): void {
+    this.showImportModal = false;
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.importFile = input.files[0];
+      this.importError = '';
+    }
+  }
+
+  submitImport(): void {
+  if (!this.importFile) {
+    this.importError = 'Selecione um arquivo CSV.';
+    return;
+  }
+  if (!this.importFile.name.endsWith('.csv')) {
+    this.importError = 'Apenas arquivos .csv são aceitos.';
+    return;
+  }
+ 
+  this.importLoading = true;
+  this.importError   = '';
+  this.importSuccess = '';
+ 
+  const formData = new FormData();
+  formData.append('file', this.importFile);
+ 
+  this.clientService.importCsv(formData).subscribe({
+    next: (result: ImportResult) => {
+      this.importLoading = false;
+      this.importSuccess = `${result.imported} cliente(s) importado(s) com sucesso!`;
+      if (result.skipped > 0) {
+        this.importSuccess += ` ${result.skipped} ignorado(s).`;
+      }
+      setTimeout(() => this.closeImportModal(), 2000);
+    },
+    error: (err) => {
+      this.importLoading = false;
+      this.importError = err?.error?.message || 'Erro ao importar o arquivo. Verifique o formato e tente novamente.';
+    }
+  });
+}
+
+  // ─── Metric cards ─────────────────────────────────────────────────────────────
 
   private buildMetricCards(data: DashboardMetrics): any[] {
     return [
@@ -116,7 +196,7 @@ error: () => {
     ];
   }
 
-  // ─── Chat ────────────────────────────────────────────────────────────────────
+  // ─── Chat ─────────────────────────────────────────────────────────────────────
 
   sendMessage(): void {
     if (!this.chatInput.trim() || this.isTyping) return;
@@ -142,7 +222,7 @@ error: () => {
     this.sendMessage();
   }
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────────
+  // ─── Helpers ──────────────────────────────────────────────────────────────────
 
   private calcOverdueDays(dueDate: string): number {
     const diff = Date.now() - new Date(dueDate).getTime();
@@ -168,7 +248,7 @@ error: () => {
     return map[status] || status;
   }
 
-  // ─── Chart builders ──────────────────────────────────────────────────────────
+  // ─── Chart builders ───────────────────────────────────────────────────────────
 
   private get chartInnerW(): number { return this.chartWidth - this.chartPadLeft - this.chartPadRight; }
   private get chartInnerH(): number { return this.chartHeight - this.chartPadTop - this.chartPadBottom; }

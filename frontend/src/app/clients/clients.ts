@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientService, Client } from '../services/client';
 import { ScoreService, ClientScore } from '../services/score';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-clients',
@@ -33,12 +34,17 @@ export class Clients implements OnInit {
     private clientService: ClientService,
     private scoreService: ScoreService,
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
+    
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadClients();
+    this.route.queryParams.subscribe(params => {
+    if (params['openModal']) this.openModal();
+    });
   }
 
   initForm(): void {

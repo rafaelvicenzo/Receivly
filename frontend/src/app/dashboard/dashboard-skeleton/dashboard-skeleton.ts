@@ -7,13 +7,6 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="dash-content">
-
-      <!-- GREETING -->
-      <div class="skel-greeting">
-        <div class="skel title"></div>
-        <div class="skel sub"></div>
-      </div>
-
       <!-- METRICS -->
       <div class="metrics-grid">
         <div class="metric-card" *ngFor="let _ of [1,2,3,4]">

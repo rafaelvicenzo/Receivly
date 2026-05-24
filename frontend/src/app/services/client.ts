@@ -19,6 +19,12 @@ export interface Client {
   created_at?: string;
 }
 
+export interface ImportResult {
+  imported: number;
+  skipped: number;
+  errors: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -48,5 +54,9 @@ export class ClientService {
 
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/clients/${id}`);
+  }
+
+  importCsv(formData: FormData): Observable<ImportResult> {
+    return this.http.post<ImportResult>(`${this.apiUrl}/clients/import`, formData);
   }
 }
