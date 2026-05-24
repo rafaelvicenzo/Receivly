@@ -4,18 +4,20 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ChargeService, Charge } from '../services/charge';
 import { ClientService, Client } from '../services/client';
 import { ChargesSkeletonComponent } from './charges-skeleton/charges-skeleton';
+import { PaginationComponent } from '../shared/pagination.component';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-charges',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ChargesSkeletonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ChargesSkeletonComponent, PaginationComponent],
   templateUrl: './charges.html',
   styleUrl: './charges.scss'
 })
 export class Charges implements OnInit {
   charges: Charge[] = [];
   filteredCharges: Charge[] = [];
+  pagedCharges: Charge[] = [];
   clients: Client[] = [];
   isLoading = false;
   showModal = false;
@@ -25,6 +27,11 @@ export class Charges implements OnInit {
   chargeForm!: FormGroup;
   errorMessage = '';
   successMessage = '';
+  searchQuery = '';
+
+  // Paginação
+  currentPage = 1;
+  pageSize = 5;
 
   constructor(
     private chargeService: ChargeService,
@@ -39,8 +46,8 @@ export class Charges implements OnInit {
     this.loadCharges();
     this.loadClients();
     this.route.queryParams.subscribe(params => {
-    if (params['openModal']) this.openModal();
-  });
+      if (params['openModal']) this.openModal();
+    });
   }
 
   initForm(): void {
@@ -115,27 +122,59 @@ export class Charges implements OnInit {
   }
 
   loadCharges(): void {
-  this.isLoading = true;
-  this.chargeService.getAll().subscribe({
-    next: (data) => {
-      this.charges = data;
-      this.applyFilter();
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }
+    this.isLoading = true;
+    this.chargeService.getAll().subscribe({
+      next: (data) => {
+        this.charges = data;
+        this.applyFilter();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
+  onSearch(event: Event): void {
+    this.searchQuery = (event.target as HTMLInputElement).value;
+    this.applyFilter();
+  }
+
   applyFilter(): void {
-    if (this.filterStatus === 'all') {
-      this.filteredCharges = this.charges;
-    } else {
-      this.filteredCharges = this.charges.filter(c => c.status === this.filterStatus);
-    }
+  let result = this.filterStatus === 'all'
+    ? this.charges
+    : this.charges.filter(c => c.status === this.filterStatus);
+
+  if (this.searchQuery) {
+    const q = this.searchQuery.toLowerCase();
+    result = result.filter(c =>
+      c.customer_name?.toLowerCase().includes(q) ||
+      c.customer_email?.toLowerCase().includes(q) ||
+      c.description?.toLowerCase().includes(q)
+    );
+  }
+
+    this.filteredCharges = result;
+    this.currentPage = 1;
+    this.updatePage();
+  }
+
+  updatePage(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedCharges = this.filteredCharges.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.updatePage();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.updatePage();
   }
 
   setFilter(status: string): void {
@@ -212,20 +251,15 @@ export class Charges implements OnInit {
 
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
-      pending: 'Pendente',
-      paid: 'Pago',
-      overdue: 'Vencido',
-      cancelled: 'Cancelado'
+      pending: 'Pendente', paid: 'Pago', overdue: 'Vencido', cancelled: 'Cancelado'
     };
     return map[status] || status;
   }
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      pending: 'status-pendente',
-      paid: 'status-pago',
-      overdue: 'status-vencido',
-      cancelled: 'status-cancelado'
+      pending: 'status-pendente', paid: 'status-pago',
+      overdue: 'status-vencido', cancelled: 'status-cancelado'
     };
     return map[status] || '';
   }

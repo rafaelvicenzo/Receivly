@@ -39,9 +39,15 @@
 
   <!-- TABLE -->
   <div class="table-card">
-    <div class="loading" *ngIf="isLoading">Carregando...</div>
-
-    <table class="charges-table" *ngIf="!isLoading">
+    <div class="table-toolbar">
+    <div class="search-wrapper">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="search-icon">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Buscar cliente, descrição..." class="search-input" (input)="onSearch($event)">
+    </div>
+  </div>
+    <table class="charges-table">
       <thead>
         <tr>
           <th>Cliente</th>
@@ -54,10 +60,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngIf="filteredCharges.length === 0">
+        <tr *ngIf="pagedCharges.length === 0">
           <td colspan="7" class="empty-state">Nenhuma cobrança encontrada.</td>
         </tr>
-        <tr *ngFor="let charge of filteredCharges">
+        <tr *ngFor="let charge of pagedCharges">
           <td class="client-cell">
             <div class="client-avatar">{{ charge.customer_name.charAt(0) }}</div>
             <div class="client-info">
@@ -99,7 +105,17 @@
         </tr>
       </tbody>
     </table>
+
   </div>
+  <!-- PAGINAÇÃO -->
+    <app-pagination
+      [totalItems]="filteredCharges.length"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      itemLabel="cobranças"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)">
+    </app-pagination>
 
   <!-- MODAL -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">

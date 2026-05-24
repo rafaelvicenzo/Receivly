@@ -114,7 +114,7 @@
     </div>
 
     <!-- CLIENT ROWS -->
-    <div class="client-row" *ngFor="let client of filteredClients" (click)="openDrawer(client)">
+    <div class="client-row" *ngFor="let client of pagedClients" (click)="openDrawer(client)">
       <div class="col-client">
         <div class="avatar" [style.background]="getAvatarColor(client.name)">
           {{ getInitials(client.name) }}
@@ -172,6 +172,15 @@
       </div>
     </div>
   </div>
+
+  <app-pagination
+  [totalItems]="filteredClients.length"
+  [currentPage]="currentPage"
+  [pageSize]="pageSize"
+  itemLabel="clientes"
+  (pageChange)="onPageChange($event)"
+  (pageSizeChange)="onPageSizeChange($event)">
+</app-pagination>
 
   <!-- DRAWER -->
   <div class="drawer-overlay" *ngIf="showDrawer" (click)="closeDrawer()">

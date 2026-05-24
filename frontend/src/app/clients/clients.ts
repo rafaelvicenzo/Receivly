@@ -5,11 +5,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ClientService, Client } from '../services/client';
 import { ScoreService, ClientScore } from '../services/score';
 import { ActivatedRoute } from '@angular/router';
+import { PaginationComponent } from '../shared/pagination.component';
 
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ClientsSkeletonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ClientsSkeletonComponent, PaginationComponent],
   templateUrl: './clients.html',
   styleUrl: './clients.scss'
 })
@@ -29,6 +30,9 @@ export class Clients implements OnInit {
   clientForm!: FormGroup;
   errorMessage = '';
   successMessage = '';
+  pagedClients: Client[] = [];
+  currentPage = 1;
+  pageSize = 5;
 
   constructor(
     private clientService: ClientService,
@@ -95,23 +99,41 @@ export class Clients implements OnInit {
   }
 
   applyFilter(): void {
-    let result = this.clients;
+  let result = this.clients;
 
-    if (this.searchQuery) {
-      const q = this.searchQuery.toLowerCase();
-      result = result.filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.email?.toLowerCase().includes(q) ||
-        c.phone?.includes(q) ||
-        c.document?.includes(q)
-      );
-    }
+  if (this.searchQuery) {
+    const q = this.searchQuery.toLowerCase();
+    result = result.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.phone?.includes(q) ||
+      c.document?.includes(q)
+    );
+  }
 
-    if (this.filterStatus !== 'all') {
-      result = result.filter(c => c.status === this.filterStatus);
-    }
+  if (this.filterStatus !== 'all') {
+    result = result.filter(c => c.status === this.filterStatus);
+  }
 
     this.filteredClients = result;
+    this.currentPage = 1;
+    this.updatePage();
+  }
+
+  updatePage(): void {
+  const start = (this.currentPage - 1) * this.pageSize;
+  this.pagedClients = this.filteredClients.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.updatePage();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.updatePage();
   }
 
   onSearch(event: Event): void {
