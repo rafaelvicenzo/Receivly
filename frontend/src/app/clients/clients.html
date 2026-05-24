@@ -1,4 +1,5 @@
-<div class="clients-page">
+<app-clients-skeleton *ngIf="isLoading"></app-clients-skeleton>
+<div class="clients-page" *ngIf="!isLoading">
 
   <!-- PAGE HEADER -->
   <div class="page-header">

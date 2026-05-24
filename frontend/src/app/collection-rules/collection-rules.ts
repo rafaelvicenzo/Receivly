@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CollectionRuleService, CollectionRule, RuleStep } from '../services/collection-rule';
+import { CollectionRulesSkeletonComponent } from './collection-rules-skeleton/collection-rules-skeleton';
 
 @Component({
   selector: 'app-collection-rules',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CollectionRulesSkeletonComponent],
   templateUrl: './collection-rules.html',
   styleUrl: './collection-rules.scss'
 })

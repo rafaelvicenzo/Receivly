@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ClientsSkeletonComponent } from './clients-skeleton/clients-skeleton';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientService, Client } from '../services/client';
@@ -7,7 +8,7 @@ import { ScoreService, ClientScore } from '../services/score';
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ClientsSkeletonComponent],
   templateUrl: './clients.html',
   styleUrl: './clients.scss'
 })
@@ -31,7 +32,8 @@ export class Clients implements OnInit {
   constructor(
     private clientService: ClientService,
     private scoreService: ScoreService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -57,13 +59,16 @@ export class Clients implements OnInit {
   loadClients(): void {
     this.isLoading = true;
     this.clientService.getAll().subscribe({
-      next: (data) => {
-        this.clients = data;
-        this.applyFilter();
-        this.isLoading = false;
-        this.loadAllScores();
-      },
-      error: () => { this.isLoading = false; }
+     next: (data) => {
+      this.clients = data;
+      this.applyFilter();
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
     });
   }
 

@@ -1,11 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReportService, ReportData } from '../services/report';
+import { ReportsSkeletonComponent } from './reports-skeleton/reports-skeleton';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReportsSkeletonComponent],
   templateUrl: './reports.html',
   styleUrl: './reports.scss'
 })

@@ -1,4 +1,5 @@
-<div class="rules-page">
+<app-collection-rules-skeleton *ngIf="isLoading"></app-collection-rules-skeleton>
+<div class="rules-page" *ngIf="!isLoading">
 
   <!-- PAGE HEADER -->
   <div class="page-header">
