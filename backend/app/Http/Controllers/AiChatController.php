@@ -15,15 +15,20 @@ class AiChatController extends Controller
             'message' => 'required|string|max:500'
         ]);
 
-        $user = $request->user();
+        $user    = $request->user();
         $context = $this->buildContext($user);
 
-        $systemPrompt = "Você é um assistente financeiro inteligente do sistema Receivly, uma plataforma de cobranças brasileira. Responda sempre em português, de forma clara e objetiva. Use os dados fornecidos para dar insights reais. Seja direto e use no máximo 3 parágrafos.";
+        $systemPrompt = "Você é um assistente financeiro do Receivly, plataforma brasileira de cobranças.
+Regras obrigatórias:
+- Responda SEMPRE em português
+- Máximo de 2 frases curtas por resposta
+- Seja direto e objetivo, sem introduções como 'Claro!' ou 'Ótima pergunta!'
+- Use os dados financeiros fornecidos para dar respostas precisas
+- Valores em reais: use o formato R$ 1.000,00
+- Nunca repita a pergunta do usuário
+- Se não souber, diga em uma frase";
 
-        $userPrompt = "Dados financeiros do usuário:
-{$context}
-
-Pergunta: {$request->message}";
+        $userPrompt = "Dados financeiros:\n{$context}\n\nPergunta: {$request->message}";
 
         try {
             $response = Http::withHeaders([
@@ -35,17 +40,14 @@ Pergunta: {$request->message}";
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user',   'content' => $userPrompt],
                 ],
-                'max_tokens'  => 512,
-                'temperature' => 0.7,
+                'max_tokens'  => 120,
+                'temperature' => 0.4,
             ]);
-
-            \Log::info('Groq status: ' . $response->status());
-            \Log::info('Groq response: ' . $response->body());
 
             $data = $response->json();
             $text = $data['choices'][0]['message']['content'] ?? 'Não consegui processar sua pergunta.';
 
-            return response()->json(['response' => $text]);
+            return response()->json(['response' => trim($text)]);
 
         } catch (\Exception $e) {
             \Log::error('Groq error: ' . $e->getMessage());
@@ -58,30 +60,28 @@ Pergunta: {$request->message}";
         $charges = $user->charges()->get();
         $clients = $user->clients()->get();
 
-        $totalCharges  = $charges->count();
-        $totalPending  = $charges->where('status', 'pending')->sum('amount');
-        $totalOverdue  = $charges->where('status', 'overdue')->sum('amount');
-        $totalPaid     = $charges->where('status', 'paid')->sum('amount');
-        $overdueCount  = $charges->where('status', 'overdue')->count();
-        $totalClients  = $clients->count();
+        $totalCharges = $charges->count();
+        $totalPending = $charges->where('status', 'pending')->sum('amount');
+        $totalOverdue = $charges->where('status', 'overdue')->sum('amount');
+        $totalPaid    = $charges->where('status', 'paid')->sum('amount');
+        $overdueCount = $charges->where('status', 'overdue')->count();
+        $totalClients = $clients->count();
 
         $topOverdue = $charges->where('status', 'overdue')
             ->sortByDesc('amount')
             ->take(3)
-            ->map(fn($c) => "{$c->customer_name}: R$ {$c->amount}")
+            ->map(fn($c) => "{$c->customer_name}: R$ " . number_format($c->amount, 2, ',', '.'))
             ->implode(', ');
 
-        $inadimplencia = $totalCharges > 0 ? round(($overdueCount / $totalCharges) * 100, 1) : 0;
+        $inadimplencia = $totalCharges > 0
+            ? round(($overdueCount / $totalCharges) * 100, 1)
+            : 0;
 
-        return "
-- Total de clientes: {$totalClients}
-- Total de cobranças: {$totalCharges}
-- Valor pendente: R$ " . number_format($totalPending, 2, ',', '.') . "
-- Valor vencido: R$ " . number_format($totalOverdue, 2, ',', '.') . "
-- Valor recebido: R$ " . number_format($totalPaid, 2, ',', '.') . "
-- Cobranças vencidas: {$overdueCount}
-- Taxa de inadimplência: {$inadimplencia}%
-- Maiores devedores: {$topOverdue}
-        ";
+        return "Clientes: {$totalClients} | Cobranças: {$totalCharges} | "
+            . "Recebido: R$ " . number_format($totalPaid, 2, ',', '.') . " | "
+            . "Pendente: R$ " . number_format($totalPending, 2, ',', '.') . " | "
+            . "Vencido: R$ " . number_format($totalOverdue, 2, ',', '.') . " | "
+            . "Inadimplência: {$inadimplencia}% | "
+            . "Top devedores: {$topOverdue}";
     }
 }

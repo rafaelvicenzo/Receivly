@@ -1,0 +1,215 @@
+<div class="wa-page">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       ESTADO: DESCONECTADO
+  ════════════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!(status$ | async)?.connected">
+
+    <!-- Tela inicial: nenhum QR gerado ainda -->
+    <div class="wa-connect-screen" *ngIf="!(status$ | async)?.qr">
+      <div class="wa-connect-card">
+        <div class="wa-connect-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h2>Conecte seu WhatsApp</h2>
+        <p>Visualize e responda conversas dos seus clientes diretamente aqui, sem sair da plataforma.</p>
+        <ul class="wa-feature-list">
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Histórico completo de conversas
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Atalhos rápidos de cobrança (Pix, Boleto)
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Mensagens em tempo real
+          </li>
+        </ul>
+        <button class="wa-btn-connect" (click)="connect()">
+          Conectar WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <!-- Tela de QR Code -->
+    <div class="wa-connect-screen" *ngIf="(status$ | async)?.qr">
+      <div class="wa-qr-card">
+        <h2>Escaneie o QR Code</h2>
+        <p>No celular: <strong>WhatsApp → Dispositivos conectados → Conectar dispositivo</strong></p>
+        <div class="wa-qr-frame">
+          <img [src]="(status$ | async)?.qr" alt="QR Code" />
+        </div>
+        <span class="wa-qr-hint">O QR Code expira em 60 segundos e é gerado automaticamente</span>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       ESTADO: CONECTADO — Interface de chat
+  ════════════════════════════════════════════════════════════════════════════ -->
+  <div class="wa-layout" *ngIf="(status$ | async)?.connected">
+
+    <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+    <aside class="wa-sidebar">
+
+      <div class="wa-sidebar-top">
+        <h2>Mensagens</h2>
+        <button class="wa-icon-btn" (click)="disconnect()" title="Desconectar WhatsApp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="wa-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" placeholder="Buscar por nome ou telefone" [(ngModel)]="searchQuery" />
+      </div>
+
+      <div class="wa-filters">
+        <button [class.active]="filter === 'all'"       (click)="filter = 'all'">Todas</button>
+        <button [class.active]="filter === 'attending'" (click)="filter = 'attending'">Atendimento</button>
+        <button [class.active]="filter === 'new'"       (click)="filter = 'new'">Novas</button>
+      </div>
+
+      <div class="wa-contacts">
+        <div
+          class="wa-contact"
+          *ngFor="let c of filteredContacts"
+          [class.active]="(activeJid$ | async) === c.jid"
+          (click)="openChat(c)"
+        >
+          <div class="wa-avatar">{{ initial(c.name) }}</div>
+          <div class="wa-contact-body">
+            <div class="wa-contact-row">
+              <span class="wa-contact-name">{{ c.name }}</span>
+              <span class="wa-contact-time">{{ relativeTime(c.lastMessageTime) }}</span>
+            </div>
+            <div class="wa-contact-row">
+              <span class="wa-contact-preview">{{ c.lastMessage }}</span>
+              <span class="wa-badge" *ngIf="c.unreadCount > 0">{{ c.unreadCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wa-empty" *ngIf="filteredContacts.length === 0">
+          <p>Nenhuma conversa encontrada</p>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── Área principal ─────────────────────────────────────────────────── -->
+    <main class="wa-main">
+
+      <!-- Nenhum chat selecionado -->
+      <div class="wa-no-chat" *ngIf="!(activeJid$ | async)">
+        <div class="wa-no-chat-inner">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>Selecione uma conversa para começar</p>
+        </div>
+      </div>
+
+      <!-- Chat aberto -->
+      <ng-container *ngIf="activeContact">
+
+        <!-- Header do chat -->
+        <div class="wa-chat-header">
+          <div class="wa-avatar wa-avatar--lg">{{ initial(activeContact.name) }}</div>
+          <div class="wa-chat-header-info">
+            <span class="wa-chat-name">{{ activeContact.name }}</span>
+            <span class="wa-chat-phone">{{ activeContact.phone }}</span>
+          </div>
+          <div class="wa-shortcuts">
+            <button class="wa-shortcut" (click)="applyShortcut('cobranca')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Cobrar
+            </button>
+            <button class="wa-shortcut" (click)="applyShortcut('boleto')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Boleto
+            </button>
+            <button class="wa-shortcut wa-shortcut--pix" (click)="applyShortcut('pix')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+              </svg>
+              Pix
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensagens -->
+        <div class="wa-messages" #messagesEl>
+          <ng-container *ngFor="let msg of (messages$ | async); let i = index">
+
+            <div class="wa-date-sep" *ngIf="showDateSep(i)">
+              <span>{{ dateLabel(msg.timestamp) }}</span>
+            </div>
+
+            <div class="wa-msg" [class.wa-msg--out]="msg.fromMe" [class.wa-msg--in]="!msg.fromMe">
+              <div class="wa-bubble">
+                <p class="wa-bubble-text">{{ msg.body }}</p>
+                <div class="wa-bubble-footer">
+                  <span class="wa-bubble-time">{{ msgTime(msg.timestamp) }}</span>
+                  <span class="wa-tick" *ngIf="msg.fromMe">
+                    <!-- Enviado -->
+                    <svg *ngIf="msg.status === 'sent'" width="14" height="10" viewBox="0 0 16 11" fill="none" stroke="#a0aec0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="1 5 5 9 15 1"/>
+                    </svg>
+                    <!-- Entregue -->
+                    <svg *ngIf="msg.status === 'delivered'" width="18" height="10" viewBox="0 0 20 11" fill="none" stroke="#a0aec0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="1 5 5 9 15 1"/>
+                      <polyline points="6 5 10 9 20 1"/>
+                    </svg>
+                    <!-- Lido -->
+                    <svg *ngIf="msg.status === 'read'" width="18" height="10" viewBox="0 0 20 11" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="1 5 5 9 15 1"/>
+                      <polyline points="6 5 10 9 20 1"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+
+        <!-- Input -->
+        <div class="wa-input-bar">
+          <textarea
+            #inputEl
+            class="wa-input"
+            placeholder="Digite uma mensagem… (Enter para enviar, Shift+Enter para nova linha)"
+            [(ngModel)]="draft"
+            (keydown.enter)="onEnter($any($event))"
+            rows="1"
+          ></textarea>
+          <button class="wa-send" [disabled]="!draft.trim()" (click)="send()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+
+      </ng-container>
+
+    </main>
+  </div>
+
+</div>

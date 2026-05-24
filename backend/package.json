@@ -15,6 +15,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@nestjs/event-emitter": "^3.1.0",
         "@nestjs/platform-socket.io": "^11.1.23",
         "@nestjs/websockets": "^11.1.23",
         "@whiskeysockets/baileys": "^7.0.0-rc13",

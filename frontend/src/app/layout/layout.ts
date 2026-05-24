@@ -21,12 +21,12 @@ export class Layout {
     this.router.events.subscribe(() => {
       const url = this.router.url;
       if (url.includes('collection-rules')) this.currentPage = 'regua';
-      else if (url.includes('dashboard')) this.currentPage = 'dashboard';
-      else if (url.includes('charges')) this.currentPage = 'cobrancas';
-      else if (url.includes('clients')) this.currentPage = 'clientes';
-      else if (url.includes('reports')) this.currentPage = 'relatorios';
-      else if (url.includes('ruler')) this.currentPage = 'ruler';
-      else if (url.includes('settings')) this.currentPage = 'configuracoes';
+      else if (url.includes('dashboard'))   this.currentPage = 'dashboard';
+      else if (url.includes('charges'))     this.currentPage = 'cobrancas';
+      else if (url.includes('clients'))     this.currentPage = 'clientes';
+      else if (url.includes('reports'))     this.currentPage = 'relatorios';
+      else if (url.includes('whatsapp'))    this.currentPage = 'whatsapp';
+      else if (url.includes('settings'))    this.currentPage = 'configuracoes';
     });
   }
 
@@ -42,13 +42,13 @@ export class Layout {
   navigate(page: string): void {
     this.currentPage = page;
     const routes: Record<string, string> = {
-      dashboard: '/dashboard',
-      cobrancas: '/charges',
-      clientes: '/clients',
+      dashboard:  '/dashboard',
+      cobrancas:  '/charges',
+      clientes:   '/clients',
       relatorios: '/reports',
-      pix: '/pix',
+      regua:      '/collection-rules',
+      whatsapp:   '/whatsapp',
       configuracoes: '/settings',
-      regua: '/collection-rules',
     };
     if (routes[page]) {
       this.router.navigate([routes[page]]);

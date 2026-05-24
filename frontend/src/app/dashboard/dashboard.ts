@@ -204,15 +204,18 @@ export class Dashboard implements OnInit {
     this.chatMessages.push({ role: 'user', content: userMessage });
     this.chatInput = '';
     this.isTyping = true;
-
+    this.cdr.detectChanges();
+  
     this.aiChatService.sendMessage(userMessage).subscribe({
       next: (res) => {
         this.chatMessages.push({ role: 'bot', content: res.response });
         this.isTyping = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.chatMessages.push({ role: 'bot', content: 'Erro ao processar sua pergunta. Tente novamente.' });
         this.isTyping = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -10,7 +10,7 @@ import { CollectionRules } from './collection-rules/collection-rules';
 import { authGuard } from './guards/auth-guard';
 import { Reports } from './reports/reports';
 import { AuthSocialComponent } from './auth-social/auth-social';
-
+import { Whatsapp } from './whatsapp/whatsapp';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -27,6 +27,7 @@ export const routes: Routes = [
       { path: 'clients', component: Clients },
       { path: 'collection-rules', component: CollectionRules },
       { path: 'reports', component: Reports },
+      { path: 'whatsapp', component: Whatsapp },
       { path: 'auth/social', component: AuthSocialComponent },
     ]
   },
